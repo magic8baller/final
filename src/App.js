@@ -1,10 +1,7 @@
 import React, { Component } from 'react'
 import SpotifyPlayer from 'react-spotify-player'
-import spotifyWebApi from 'spotify-web-api-js'
 import './App.css'
 require('inter-ui')
-const Spotify = new spotifyWebApi()
-
 let defaultStyle = {
   color: '#fff',
   'font-family': 'Inter, sans-serif',
@@ -17,7 +14,7 @@ let counterStyle = {
   'line-height': '30px'
 }
 
-/* PLAYLISTCOUNTER COMP */
+/* PLAYLISTCOUNTER COMPONENT */
 class PlaylistCounter extends Component {
   render() {
     let playlistCounterStyle = counterStyle
@@ -29,7 +26,33 @@ class PlaylistCounter extends Component {
   }
 }
 
-/* FILTER COMP */
+/* HOURSCOUNTER COMPONENT */
+class HoursCounter extends Component {
+  render() {
+    let allSongs = this.props.playlists.reduce((songs, eachPlaylist) => {
+      return songs.concat(eachPlaylist.songs)
+    }, [])
+
+    let totalDuration = allSongs.reduce((sum, eachSong) => {
+      return sum + eachSong.duration
+    }, 0)
+    let totalDurationHours = Math.round(totalDuration / 60)
+    let isTooLow = totalDurationHours < 40
+    let hoursCounterStyle = {
+      ...counterStyle,
+
+      color: isTooLow ? '#2FD566' : 'white',
+      'font-weight': isTooLow ? 'bold' : 'normal'
+    }
+    return (
+      <div style={hoursCounterStyle}>
+        <h2>{totalDurationHours} hours</h2>
+      </div>
+    )
+  }
+}
+
+/* FILTER COMPONENT */
 class Filter extends Component {
   render() {
     return (
@@ -50,7 +73,7 @@ class Filter extends Component {
   }
 }
 
-/* PLAYLIST COMP */
+/* PLAYLIST COMPONENT */
 class Playlist extends Component {
   render() {
     let playlist = this.props.playlist
@@ -61,10 +84,39 @@ class Playlist extends Component {
           padding: '10px'
         }}
       >
-        <div className="internalGridItems">
+        <div
+          className="internalGridItems"
+          style={{
+            display: 'grid',
+            'grid-template-columns': '1fr'
+          }}
+        >
           <img src={playlist.imageUrl} style={{ width: '100%' }} />
-          <h2 className="plistName"> {playlist.name} </h2>
-          <ul className="playlistUl">
+          <h2
+            style={{
+              'margin-top': '10px',
+              'font-size': '22px',
+              'font-style': 'bold',
+              'font-family':
+                'HelveticaNeue, Helvetica Neue, Helvetica Neue, Helvetica, Arial, Lucida Grande, sans-serif',
+
+              color: '#fff'
+            }}
+          >
+            {' '}
+            {playlist.name}{' '}
+          </h2>
+          <ul
+            style={{
+              'margin-top': '10px',
+              'font-weight': 'bold',
+              color: '#AEAEAE',
+              'font-family': 'Inter, sans-serif',
+              'font-weight': '500',
+              'font-style': 'italic',
+              'font-size': '14px'
+            }}
+          >
             <SpotifyPlayer
               // uri={playlist.uri}
               size="large"
@@ -73,7 +125,17 @@ class Playlist extends Component {
             />{' '}
             feat:
             {playlist.songs.map(song => (
-              <li className="featSongs"> - {song.name} </li>
+              <li
+                style={{
+                  'padding-top': '2px',
+                  'font-style': 'normal',
+                  'font-size': '14px',
+                  'margin-left': '10px'
+                }}
+              >
+                {' '}
+                - {song.name}{' '}
+              </li>
             ))}
           </ul>
         </div>
@@ -82,7 +144,7 @@ class Playlist extends Component {
   }
 }
 
-/* MAIN COMP */
+/* MAIN COMPONENT */
 class App extends Component {
   constructor() {
     super()
@@ -96,13 +158,11 @@ class App extends Component {
     const hashParams = new URLSearchParams(window.location.hash.substring(1))
     let accessToken = hashParams.get('access_token')
     let refreshToken = hashParams.get('refresh_token')
-    // Spotify.setAccessToken(accessToken)
     if (!accessToken) return
     fetch('https://api.spotify.com/v1/me', {
       headers: { Authorization: 'Bearer ' + accessToken }
     })
-      // Spotify.getMe()
-      .then(res => res.json())
+      .then(response => response.json())
       .then(data =>
         this.setState({
           user: {
@@ -115,16 +175,17 @@ class App extends Component {
     fetch('https://api.spotify.com/v1/me/playlists', {
       headers: { Authorization: 'Bearer ' + accessToken }
     })
-      // Spotify.getPlaylists()
-      .then(res => res.json())
+      .then(response => response.json())
       .then(playlistData => {
         let playlists = playlistData.items
 
         let trackDataPromises = playlists.map(playlist => {
-          let resPromise = fetch(playlist.tracks.href, {
+          let responsePromise = fetch(playlist.tracks.href, {
             headers: { Authorization: 'Bearer ' + accessToken }
           })
-          let trackDataPromise = resPromise.then(res => res.json())
+          let trackDataPromise = responsePromise.then(response =>
+            response.json()
+          )
           return trackDataPromise
         })
 
@@ -149,7 +210,7 @@ class App extends Component {
           playlists: playlists.map(item => {
             return {
               name: item.name,
-              imageUrl: item.images[0].url,
+              // imageUrl: item.images[0].url,
               uri: item.uri,
               songs: item.trackDatas.slice(0, 3)
             }
@@ -162,15 +223,15 @@ class App extends Component {
     let playlistToRender =
       this.state.user && this.state.playlists
         ? this.state.playlists.filter(playlist => {
-            let matchedPlaylist = playlist.name
+            let matchesPlaylist = playlist.name
               .toLowerCase()
               .includes(this.state.filterString.toLowerCase())
-            let matchedSong = playlist.songs.find(song =>
+            let matchesSong = playlist.songs.find(song =>
               song.name
                 .toLowerCase()
                 .includes(this.state.filterString.toLowerCase())
             )
-            return matchedPlaylist || matchedSong
+            return matchesPlaylist || matchesSong
           })
         : []
 
@@ -178,14 +239,39 @@ class App extends Component {
       <div className="App">
         {this.state.user ? (
           <div>
-            <div className="topItems">
-              <h1 className="playlistName">
+            <div
+              className="topItems"
+              style={{
+                margin: '15px',
+                display: 'grid',
+                'grid-template-columns': '3fr 1fr 1fr 0.5fr',
+                'align-items': 'center',
+                'justify-items': 'center',
+                'background-color': 'black',
+                padding: '15px 5px 15px 5px'
+              }}
+            >
+              <h1
+                className="playlistName"
+                style={{
+                  color: '#2FD566',
+                  'font-size': '34px',
+                  'font-family': 'Inter, sans-serif',
+                  'font-weight': '700',
+                  'justify-self': 'start',
+                  'margin-left': '30px'
+                }}
+              >
                 {' '}
                 <img src={this.state.user.avatar} alt="avatar" />
                 {this.state.user.name}'s Playlists
               </h1>
-              <div className="plistCounter">
+              <div
+                className="bothCounters"
+                style={{ 'text-align': 'right', width: '80%' }}
+              >
                 <PlaylistCounter playlists={playlistToRender} />
+                <HoursCounter playlists={playlistToRender} />
               </div>
 
               <Filter
@@ -195,10 +281,21 @@ class App extends Component {
               <img
                 src={require('./images/Spotify_Icon_RGB_Green.png')}
                 className="spotifyIcon"
+                style={{ 'padding-left': '5px', height: '42px' }}
               />
             </div>
 
-            <div className="playlistGridStyle">
+            <div
+              className="playlistGridStyle"
+              style={{
+                display: 'grid',
+                'grid-template-columns': 'repeat(4, 1fr)',
+                'grid-gap': '20px',
+                'background-color': '#181818',
+                'margin-top': '15px',
+                padding: '30px 15px 30px 15px'
+              }}
+            >
               {playlistToRender.map((playlist, i) => (
                 <Playlist playlist={playlist} index={i} />
               ))}
