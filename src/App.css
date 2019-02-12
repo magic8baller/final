@@ -1,0 +1,84 @@
+html,
+body {
+  /* background-color: black; */
+  background-image: url('./images/kids_sharin.jpg');
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+body {
+  display: grid;
+}
+
+h2 {
+  font-size: 18px;
+}
+
+.internalGridItems {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.playlistName {
+  grid-area: 'name';
+  color: '#2FD566';
+  font-size: 34px;
+  font-family: 'Inter, sans-serif';
+  font-weight: 700;
+  justify-self: start;
+  margin-left: 20px;
+}
+.plistCounter {
+  grid-area: 'counters';
+  text-align: right;
+  width: 80%;
+}
+.mainFilter {
+  grid-area: 'filter';
+}
+.spotifyIcon {
+  grid-area: 'spotIcon';
+  padding-left: 5px;
+  height: 40px;
+}
+.topItems {
+  margin: 15px;
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr 0.5fr;
+  align-items: center;
+  justify-items: center;
+  background-color: gray;
+  padding: 15px 5px 15px 5px;
+}
+
+.featSongs {
+  padding-top: 2px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.playlistUl {
+  margin-top: 10px;
+  font-weight: bold;
+  color: '#AEAEAE';
+  font-family: 'Inter, sans-serif';
+  font-weight: 500;
+  font-style: italic;
+  font-size: 14px;
+}
+
+.plistName {
+  margin-top: 10px;
+  font-size: 22px;
+  font-style: bold;
+  font-family: 'Inter, sans-serif';
+  color: '#fff';
+}
+
+.playlistGridStyle {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+  background-color: white;
+  margin-top: 15px;
+  padding: 30px 15px 30px 15px;
+}
