@@ -118,7 +118,7 @@ class Playlist extends Component {
             }}
           >
             <SpotifyPlayer
-              // uri={playlist.uri}
+              uri={playlist.uri}
               size="large"
               theme="white"
               view="coverart"
